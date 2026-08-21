@@ -190,8 +190,8 @@ const projects = [
     title: "Amahoro Stadium",
     cat: "Masonry",
     images: [
-      "/photos/site/WhatsApp_Image_2026-08-17_at_19.38.00.jpeg",
-      "/photos/site/WhatsApp_Image_2026-08-17_at_19.38.00_1_.jpeg",
+      "/photos/projects/amahoro_1.jpeg",
+      "/photos/projects/amahoro_2.jpeg",
     ],
     location: "Kigali, Rwanda",
     company: "Various",
@@ -205,8 +205,9 @@ const projects = [
     title: "Rubavu Technical School",
     cat: "Masonry",
     images: [
-      "/photos/site/WhatsApp_Image_2026-08-17_at_18.17.17.jpeg",
-      "/photos/site/WhatsApp_Image_2026-08-17_at_18.17.17_1_.jpeg",
+      "/photos/projects/rubavu_1.jpeg",
+      "/photos/projects/rubavu_2.jpeg",
+      "/photos/projects/rubavu_3.jpeg",
     ],
     location: "Rubavu, Rwanda",
     company: "Various",
