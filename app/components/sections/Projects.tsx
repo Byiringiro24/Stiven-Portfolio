@@ -129,8 +129,8 @@ const projects = [
     title: "Guest House — Bugesera",
     cat: "Site",
     images: [
-      "/photos/projects/project_3.jpeg",
-      "/photos/projects/project_4.jpeg",
+      "/photos/projects/guesthouse_1.jpeg",
+      "/photos/projects/guesthouse_2.jpeg",
     ],
     location: "Bugesera, Mayange",
     company: "ARK Design Ltd",
@@ -190,8 +190,8 @@ const projects = [
     title: "Amahoro Stadium",
     cat: "Masonry",
     images: [
-      "/photos/projects/project_12.jpeg",
-      "/photos/projects/project_13.jpeg",
+      "/photos/projects/amahoro_1.jpeg",
+      "/photos/projects/amahoro_2.jpeg",
     ],
     location: "Kigali, Rwanda",
     company: "Various",
