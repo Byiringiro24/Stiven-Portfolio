@@ -1,38 +1,106 @@
 ﻿"use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { MapPin, ExternalLink } from "lucide-react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 
 function useInView(ref: React.RefObject<HTMLElement | null>) {
   const [inView, setInView] = useState(false);
   useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setInView(true); }, { threshold: 0.1 });
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setInView(true); }, { threshold: 0.08 });
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
   }, [ref]);
   return inView;
 }
 
+/* ── Sliding image carousel per project card ── */
+function ImageSlider({ images, title }: { images: string[]; title: string }) {
+  const [idx, setIdx] = useState(0);
+
+  // Auto-slide every 3s
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const iv = setInterval(() => setIdx((i) => (i + 1) % images.length), 3000);
+    return () => clearInterval(iv);
+  }, [images.length]);
+
+  const prev = useCallback(() => setIdx((i) => (i - 1 + images.length) % images.length), [images.length]);
+  const next = useCallback(() => setIdx((i) => (i + 1) % images.length), [images.length]);
+
+  return (
+    <div className="relative h-52 overflow-hidden bg-black/40">
+      {images.map((img, i) => (
+        <div key={img}
+          className="absolute inset-0 transition-opacity duration-700"
+          style={{ opacity: i === idx ? 1 : 0 }}>
+          <Image src={img} alt={`${title} ${i + 1}`} fill
+            className="object-cover" sizes="(max-width:768px) 100vw, 33vw" />
+        </div>
+      ))}
+
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+
+      {/* Arrows — only if multiple images */}
+      {images.length > 1 && (
+        <>
+          <button onClick={(e) => { e.stopPropagation(); prev(); }}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 border border-[#c9a84c]/40 flex items-center justify-center text-[#c9a84c] hover:bg-[#c9a84c] hover:text-black transition-all z-10">
+            <ChevronLeft size={14} />
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); next(); }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 border border-[#c9a84c]/40 flex items-center justify-center text-[#c9a84c] hover:bg-[#c9a84c] hover:text-black transition-all z-10">
+            <ChevronRight size={14} />
+          </button>
+
+          {/* Dot indicators */}
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+            {images.map((_, i) => (
+              <button key={i} onClick={(e) => { e.stopPropagation(); setIdx(i); }}
+                className="rounded-full transition-all duration-300"
+                style={{ width: i === idx ? "16px" : "6px", height: "6px",
+                  background: i === idx ? "#c9a84c" : "rgba(255,255,255,0.4)" }} />
+            ))}
+          </div>
+
+          {/* Counter */}
+          <div className="absolute bottom-3 right-3 text-[10px] text-gray-300 bg-black/50 px-2 py-0.5 rounded-full z-10">
+            {idx + 1}/{images.length}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ── Project data with real named images ── */
 const categories = ["All", "Structural", "Site", "Masonry"];
 
 const projects = [
   {
     title: "ISOOKO TOWN VILLAGE",
     cat: "Structural",
-    img: "/photos/projects/project_1.jpeg",
+    images: [
+      "/photos/projects/isooko_1.jpeg",
+      "/photos/projects/isooko_2.jpeg",
+    ],
     location: "Gasabo, Kinyinya — Kagugu Cell",
     company: "ARK Design Ltd",
     role: "Structural Designer",
     year: "2025",
     status: "In Design",
-    desc: "Large-scale residential town village project. Responsible for full structural design of multiple residential units within the complex.",
+    desc: "Large-scale residential town village project. Full structural design of multiple residential units — calculations, drawings and specifications.",
     tags: ["Protastructure", "Structural Design", "Residential"],
   },
   {
     title: "URBAIN APARTMENT",
     cat: "Structural",
-    img: "/photos/projects/project_2.jpeg",
+    images: [
+      "/photos/projects/urban_1.jpeg",
+      "/photos/projects/urban_2.jpeg",
+      "/photos/projects/urban_3.jpeg",
+    ],
     location: "Kicukiro — Kagarama",
     company: "ARK Design Ltd",
     role: "Structural Designer",
@@ -42,21 +110,13 @@ const projects = [
     tags: ["Structural Design", "Apartment", "AutoCAD"],
   },
   {
-    title: "Guest House — Bugesera",
-    cat: "Site",
-    img: "/photos/projects/project_3.jpeg",
-    location: "Bugesera, Mayange",
-    company: "ARK Design Ltd",
-    role: "Project Manager",
-    year: "2024",
-    status: "Completed",
-    desc: "Managed full construction of a guest house. Handled labour engagement, materials acquisition, payroll preparation, supervision and timeline monitoring.",
-    tags: ["Project Management", "Guest House", "Site Supervision"],
-  },
-  {
     title: "G+1 + Basement — Nyarurama",
     cat: "Site",
-    img: "/photos/projects/project_4.jpeg",
+    images: [
+      "/photos/projects/nyarurama_1.jpeg",
+      "/photos/projects/nyabikenke_1.jpeg",
+      "/photos/projects/nyabikenke_2.jpeg",
+    ],
     location: "Kicukiro, Gatenga — Nyarurama, Nyabikenke",
     company: "ARK Design Ltd",
     role: "Site Engineer",
@@ -66,21 +126,42 @@ const projects = [
     tags: ["Site Engineering", "G+1", "Basement"],
   },
   {
+    title: "Guest House — Bugesera",
+    cat: "Site",
+    images: [
+      "/photos/projects/project_3.jpeg",
+      "/photos/projects/project_4.jpeg",
+    ],
+    location: "Bugesera, Mayange",
+    company: "ARK Design Ltd",
+    role: "Project Manager",
+    year: "2024",
+    status: "Completed",
+    desc: "Managed full construction of a guest house. Labour engagement, materials acquisition, payroll preparation, supervision and timeline monitoring.",
+    tags: ["Project Management", "Guest House", "Site Supervision"],
+  },
+  {
     title: "G+1 — Rebero, Kabeza",
     cat: "Site",
-    img: "/photos/projects/project_5.jpeg",
+    images: [
+      "/photos/projects/project_5.jpeg",
+      "/photos/projects/project_6.jpeg",
+    ],
     location: "Kicukiro, Gatenga — Rebero, Kabeza",
     company: "ARK Design Ltd",
     role: "Site Engineer",
     year: "2025",
     status: "In Progress",
-    desc: "Site engineer on G+1 residential house. Responsibilities cover setting-out, labour engagement, daily monitoring and wages administration.",
+    desc: "Site engineer on G+1 residential house. Setting-out, labour engagement, daily monitoring and wages administration.",
     tags: ["Site Engineering", "G+1", "Residential"],
   },
   {
     title: "Single-storey House — Jabana",
     cat: "Site",
-    img: "/photos/projects/project_6.jpeg",
+    images: [
+      "/photos/projects/project_7.jpeg",
+      "/photos/projects/project_8.jpeg",
+    ],
     location: "Gasabo, Jabana — Ngiryi-Gasharu",
     company: "ARK Design Ltd",
     role: "Site Engineer",
@@ -92,19 +173,26 @@ const projects = [
   {
     title: "G+2 Residential — Kanombe",
     cat: "Structural",
-    img: "/photos/projects/project_7.jpeg",
+    images: [
+      "/photos/projects/project_9.jpeg",
+      "/photos/projects/project_10.jpeg",
+      "/photos/projects/project_11.jpeg",
+    ],
     location: "Kicukiro, Kanombe — Rubirizi Busanza",
     company: "Decent Engineering Construction Ltd",
     role: "Site & Structural Engineer (Intern)",
     year: "2024",
     status: "Completed",
-    desc: "Redesigned structural drawings, prepared working drawings on site, quantity surveying (BBS, material calculations), project schedule preparation and concrete supervision.",
+    desc: "Redesigned structural drawings, prepared working drawings on site, quantity surveying (BBS, material calculations), project schedule and concrete supervision.",
     tags: ["Structural Design", "QS", "BBS", "Internship"],
   },
   {
     title: "Amahoro Stadium",
     cat: "Masonry",
-    img: "/photos/projects/project_8.jpeg",
+    images: [
+      "/photos/projects/project_12.jpeg",
+      "/photos/projects/project_13.jpeg",
+    ],
     location: "Kigali, Rwanda",
     company: "Various",
     role: "Professional Mason",
@@ -116,7 +204,10 @@ const projects = [
   {
     title: "Rubavu Technical School",
     cat: "Masonry",
-    img: "/photos/projects/project_9.jpeg",
+    images: [
+      "/photos/projects/project_14.jpeg",
+      "/photos/projects/project_15.jpeg",
+    ],
     location: "Rubavu, Rwanda",
     company: "Various",
     role: "Professional Mason",
@@ -151,7 +242,7 @@ export default function Projects() {
           <h2 className="section-title mb-5">Featured <span className="gold-text">Projects</span></h2>
           <div className="gold-divider mb-12" />
 
-          {/* Filter */}
+          {/* Filter pills */}
           <div className="flex flex-wrap justify-center gap-3">
             {categories.map((c) => (
               <button key={c} onClick={() => setActive(c)}
@@ -173,19 +264,17 @@ export default function Projects() {
               }`}
               style={{ transitionDelay: `${(i % 6) * 100}ms` }}>
 
-              {/* Image */}
-              <div className="relative h-48 overflow-hidden">
-                <Image src={p.img} alt={p.title} fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="(max-width:768px) 100vw, 33vw" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              {/* Sliding image carousel */}
+              <div className="relative">
+                <ImageSlider images={p.images} title={p.title} />
                 {/* Status badge */}
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 right-3 z-10">
                   <span className="text-xs font-bold px-2.5 py-1 rounded-full"
-                    style={{ color: statusColor[p.status] || "#c9a84c", background: (statusColor[p.status] || "#c9a84c") + "20" }}>
+                    style={{ color: statusColor[p.status] || "#c9a84c", background: (statusColor[p.status] || "#c9a84c") + "22" }}>
                     {p.status}
                   </span>
                 </div>
-                <div className="absolute bottom-3 left-3">
+                <div className="absolute bottom-3 left-3 z-10">
                   <span className="text-xs font-semibold text-white bg-black/60 px-2.5 py-1 rounded-full">{p.year}</span>
                 </div>
               </div>
@@ -195,7 +284,7 @@ export default function Projects() {
                 <div className="text-[#c9a84c] text-xs font-bold uppercase tracking-wider mb-1">{p.role}</div>
                 <h3 className="text-white font-bold text-base mb-1 group-hover:text-[#c9a84c] transition-colors leading-snug">{p.title}</h3>
                 <div className="flex items-center gap-1 text-gray-500 text-xs mb-3">
-                  <MapPin size={11} /> {p.location}
+                  <MapPin size={11} className="shrink-0" /> {p.location}
                 </div>
                 <p className="text-gray-400 text-xs leading-relaxed mb-3">{p.desc}</p>
                 <div className="flex flex-wrap gap-1.5 mb-3">
