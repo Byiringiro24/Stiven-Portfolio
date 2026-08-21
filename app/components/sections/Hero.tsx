@@ -159,7 +159,7 @@ export default function Hero() {
             {/* Badge — ARK Design */}
             <div className="absolute -bottom-4 -left-6 glass gold-border rounded-2xl px-4 py-3 float-anim" style={{ animationDelay: "0.8s" }}>
               <div className="text-[#c9a84c] font-bold text-sm">🏗️ ARK Design Ltd</div>
-              <div className="text-gray-400 text-xs">Structural Engineer</div>
+              <div className="text-gray-400 text-xs">Civil Engineer</div>
             </div>
 
             {/* Badge — IER */}
